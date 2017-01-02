@@ -265,11 +265,15 @@ public class DatabaseHelper {
             connection = DriverManager.getConnection("jdbc:sqlite:sample.db");
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);  // set timeout to 30 sec.
-
-            ResultSet rs = statement.executeQuery("SELECT * FROM " + TABLE_COURSES);
+            List<Course> courses = new ArrayList<>();
+            ResultSet rs = statement.executeQuery("SELECT " + KEY_ID + " FROM " + TABLE_COURSES);
             while (rs.next()) {
                 // read the result set
+                final UUID courseUUID = UUID.fromString(rs.getString(KEY_ID));
+                courses.add(getCourse(courseUUID));
             }
+            connection.close();
+            return courses;
         } catch (SQLException e) {
             // if the error message is "out of memory",
             // it probably means no database file is found
