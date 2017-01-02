@@ -30,7 +30,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>HelloWorld</mainClass>
+                    <mainClass>Server</mainClass>
                     <arguments>
                         <!--<argument>foo</argument>-->
                         <!--<argument>bar</argument>-->
@@ -47,6 +47,18 @@
             <artifactId>spark-core</artifactId>
             <version>2.5.4</version>
         </dependency>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.15.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.json/json -->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20160810</version>
+        </dependency>
+
     </dependencies>
 
 </project>
