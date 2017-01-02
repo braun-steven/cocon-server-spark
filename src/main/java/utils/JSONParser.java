@@ -47,7 +47,7 @@ public class JSONParser {
             boolean hasFixedPoints = jsonCourse.getBoolean(KEY_HAS_FIXED_POINTS);
 
             //Get assignments
-            String assignmentsJSONArrayString = jsonCourse.getString("assignments");
+            String assignmentsJSONArrayString = jsonCourse.getJSONArray("assignments").toString();
             ArrayList<Assignment> assignments;
             assignments  = jsonArrayToAssignmentArray(assignmentsJSONArrayString);
 

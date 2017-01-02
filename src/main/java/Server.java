@@ -1,48 +1,60 @@
 import database.DatabaseHelper;
-import objects.Assignment;
 import objects.Course;
-import spark.Request;
-import spark.Response;
-import spark.Route;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.spi.LoggerFactoryBinder;
 import utils.JSONParser;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static spark.Spark.*;
 
 public class Server {
-    public static void main(String[] args) {
-        DatabaseHelper.init();
+    private final static Logger logger = LoggerFactory.getLogger(Server.class);
 
-        post("/updateCourse", (req, res) -> {
+    public static void main(String[] args) {
+        logger.info("Started server!!!!");
+        DatabaseHelper.init();
+        port(9000);
+        post("/updateCourse", "application/json", (req, res) -> {
+
+            logger.info("Entered updateCourse");
 
             // Get params
-            final String jsonCourse = req.attribute("course");
-            final String userId = req.attribute("userId");
+            JSONObject body = new JSONObject(req.body());
+            final JSONObject jsonCourse = body.getJSONObject("course");
+            final String userId = body.getString("userId");
+
+            logger.info("JSONCOURSE: " + jsonCourse);
+            logger.info("USERID: " + userId);
 
             // Exec update
-            final Course course = JSONParser.jsonToCourse(jsonCourse);
+            final Course course = JSONParser.jsonToCourse(jsonCourse.toString());
             DatabaseHelper.insertCourse(course, userId);
 
             return "";
         });
 
-        post("/updateAssignment", (req, res) -> {
-
-            // Get params
-            String jsonAssignment = req.attribute("assignment");
-
-            // Exec update
-            final Assignment assignment = JSONParser.jsonToAssignment(jsonAssignment);
-            DatabaseHelper.insertAssignment(assignment);
-
-            return "";
-        });
+//        post("/updateAssignment", "application/json", (req, res) -> {
+//
+//            // Get params
+//            String jsonAssignment = req.attribute("assignment");
+//
+//            // Exec update
+//            final Assignment assignment = JSONParser.jsonToAssignment(jsonAssignment);
+//            DatabaseHelper.insertAssignment(assignment);
+//
+//            return "";
+//        });
 
         get("/all", (req, res) -> {
-            final String userId = req.attribute("userId");
+
+            logger.info("Entered /all");
+
+            final String userId = req.queryParams("userId");
             final List<Course> allCourses = DatabaseHelper.getAllCourses(userId);
+            logger.info("Found courses: " + allCourses);
             return JSONParser.courseArrayToJSONArray(allCourses);
         });
 

@@ -4,6 +4,8 @@ import objects.Assignment;
 import objects.Course;
 import objects.DynamicPointsCourse;
 import objects.FixedPointsCourse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import utils.JSONParser;
 
 import java.io.File;
@@ -21,6 +23,7 @@ public class DatabaseHelper {
 
     public static final String DATABASE_NAME = "cocon.db";
     public static final int DB_VERSION = 1;
+    static final Logger logger = LoggerFactory.getLogger(DatabaseHelper.class);
 
     /**
      * Initialize the database
@@ -35,7 +38,6 @@ public class DatabaseHelper {
         executeUpdate(CREATE_COURSE_TABLE);
         executeUpdate(CREATE_ASSIGNMENT_TABLE);
         executeUpdate(CREATE_USER_TABLE);
-        executeUpdate(CREATE_UNIQUE_INDEX_COURSE);
         executeUpdate(CREATE_UNIQUE_INDEX_COURSE);
         executeUpdate(CREATE_UNIQUE_INDEX_ASSIGNMENT);
     }
@@ -53,6 +55,7 @@ public class DatabaseHelper {
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);  // set timeout to 30 sec.
 
+            logger.info("Query: " + query);
             statement.executeUpdate(query);
         } catch (SQLException e) {
             // if the error message is "out of memory",
@@ -77,7 +80,9 @@ public class DatabaseHelper {
      */
     public static void insertCourse(Course course, String userId) {
         executeUpdate("REPLACE INTO " + TABLE_COURSES + " " + courseToValues(course));
-        executeUpdate("REPLACE INTO " + TABLE_USER + " values(" + userId + ", " + course.getId() + ")");
+        executeUpdate("INSERT OR IGNORE INTO " + TABLE_USER + " values('" + userId + "', '" + course.getId() + "')");
+
+        course.getAssignments().forEach(DatabaseHelper::insertAssignment);
     }
 
     /**
@@ -98,8 +103,8 @@ public class DatabaseHelper {
     public static String courseToValues(Course course) {
         StringBuilder sb = new StringBuilder();
         sb.append("values(");
-        sb.append(course.getId() + ",");
-        sb.append(course.getCourseName() + ",");
+        sb.append("'" + course.getId() + "',");
+        sb.append("'" + course.getCourseName() + "',");
         sb.append(course.getNumberOfAssignments() + ",");
 
         /*
@@ -111,7 +116,7 @@ public class DatabaseHelper {
             maxPoints = ((FixedPointsCourse) course).getMaxPoints();
         }
         sb.append(maxPoints + ",");
-        sb.append(course.hasFixedPoints() + ",");
+        sb.append((course.hasFixedPoints() ? 1 : 0) + ",");
         sb.append(course.getNecPercentToPass() + ",");
         sb.append(course.getDate());
         sb.append(")");
@@ -129,11 +134,11 @@ public class DatabaseHelper {
         StringBuilder sb = new StringBuilder();
 
         sb.append("values(");
-        sb.append(assignment.getId() + ",");
+        sb.append("'" + assignment.getId() + "',");
         sb.append(assignment.getIndex() + ",");
         sb.append(assignment.getMaxPoints() + ",");
-        sb.append(assignment.isExtraAssignment() + ",");
-        sb.append(assignment.getCourse_id() + ",");
+        sb.append(assignment.isExtraAssignment()? 1: 0 + ",");
+        sb.append("'" + assignment.getCourse_id() + "',");
         sb.append(assignment.getAchievedPoints() + ",");
         sb.append(assignment.getDate() + ",");
         sb.append(")");
@@ -144,12 +149,14 @@ public class DatabaseHelper {
         Connection connection = null;
         try {
             // create a database connection
-            connection = DriverManager.getConnection("jdbc:sqlite:sample.db");
+            connection = DriverManager.getConnection("jdbc:sqlite:cocon.db");
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);  // set timeout to 30 sec.
 
-            ResultSet rs = statement.executeQuery("SELECT * FROM " + TABLE_COURSES
-                    + " WHERE " + KEY_ID + "=" + courseId.toString());
+            final String sql = "SELECT * FROM " + TABLE_COURSES
+                    + " WHERE " + KEY_ID + "='" + courseId.toString() + "';";
+            logger.info("GetCourse Query: " + sql);
+            ResultSet rs = statement.executeQuery(sql);
             while (rs.next()) {
                 // read the result set
                 Course course = null;
@@ -159,7 +166,7 @@ public class DatabaseHelper {
 
                 //Get max points
                 double maxPoints;
-                String maxPointsString = rs.getString(KEY_MAX_POINTS);
+                String maxPointsString = rs.getString(KEY_REACHABLE_POINTS_PER_ASSIGNMENT);
                 if (maxPointsString == null) {
                     maxPoints = 0;
                 } else {
@@ -188,6 +195,7 @@ public class DatabaseHelper {
                 //get assignments
                 course.setAssignments(getAssignmentsOfCourse(courseId));
                 connection.close();
+                return course;
             }
         } catch (SQLException e) {
             // if the error message is "out of memory",
@@ -210,12 +218,12 @@ public class DatabaseHelper {
         Connection connection = null;
         try {
             // create a database connection
-            connection = DriverManager.getConnection("jdbc:sqlite:sample.db");
+            connection = DriverManager.getConnection("jdbc:sqlite:cocon.db");
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);  // set timeout to 30 sec.
 
             ResultSet rs = statement.executeQuery("SELECT * FROM " + TABLE_ASSIGNMENTS
-                    + " WHERE " + KEY_COURSE_ID + "=" + courseId.toString());
+                    + " WHERE " + KEY_COURSE_ID + "='" + courseId.toString() + "'");
             ArrayList<Assignment> assignments = new ArrayList<>();
             while (rs.next()) {
                 UUID id = UUID.fromString(rs.getString(KEY_ID));
@@ -262,15 +270,18 @@ public class DatabaseHelper {
         Connection connection = null;
         try {
             // create a database connection
-            connection = DriverManager.getConnection("jdbc:sqlite:sample.db");
+            connection = DriverManager.getConnection("jdbc:sqlite:cocon.db");
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);  // set timeout to 30 sec.
             List<Course> courses = new ArrayList<>();
-            ResultSet rs = statement.executeQuery("SELECT " + KEY_ID + "," + KEY_COURSE_ID + " FROM " + TABLE_USER
-                    + " WHERE " + KEY_ID + "=" + userId);
+            //language=SQLite
+            final String query = "SELECT " + KEY_ID + ", " + KEY_COURSE_ID + " FROM " + TABLE_USER
+                    + " WHERE " + KEY_ID + " = '" + userId+"';";
+            logger.info(query);
+            ResultSet rs = statement.executeQuery(query);
             while (rs.next()) {
                 // read the result set
-                final UUID courseUUID = UUID.fromString(rs.getString(KEY_ID));
+                final UUID courseUUID = UUID.fromString(rs.getString(KEY_COURSE_ID));
                 courses.add(getCourse(courseUUID));
             }
             connection.close();

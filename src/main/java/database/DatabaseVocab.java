@@ -54,7 +54,8 @@ public final class DatabaseVocab {
     public static final String CREATE_USER_TABLE = "CREATE TABLE " + TABLE_USER + " ("
             + KEY_ID + " TEXT,"
             + KEY_COURSE_ID + " TEXT,"
-            + "FOREIGN KEY(" + KEY_COURSE_ID + ") REFERENCES " + TABLE_COURSES + "(" + KEY_COURSE_ID + "))";
+            + "FOREIGN KEY(" + KEY_COURSE_ID + ") REFERENCES " + TABLE_COURSES + "(" + KEY_COURSE_ID + ")"
+            + "UNIQUE(" + KEY_ID + ", " + KEY_COURSE_ID + "))";
 
     public static final String INDEX_COURSE_ID = "idx_course_id";
     public static final String INDEX_ASSIGMENT_ID = "idx_assigment_id";
@@ -63,6 +64,4 @@ public final class DatabaseVocab {
             "CREATE UNIQUE INDEX " + INDEX_COURSE_ID + " ON " + TABLE_COURSES + " (" + KEY_ID + ");";
     public static final String CREATE_UNIQUE_INDEX_ASSIGNMENT =
             "CREATE UNIQUE INDEX " + INDEX_ASSIGMENT_ID + " ON " + TABLE_ASSIGNMENTS + " (" + KEY_ID + ");";
-    public static final String CREATE_UNIQUE_INDEX_USER_COURSE =
-            "CREATE UNIQUE INDEX " + INDEX_ASSIGMENT_ID + " ON " + TABLE_USER + " (" + KEY_ID + ", " + KEY_COURSE_ID + ");";
 }
