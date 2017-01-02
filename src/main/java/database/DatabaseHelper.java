@@ -55,7 +55,6 @@ public class DatabaseHelper {
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);  // set timeout to 30 sec.
 
-            logger.info("Query: " + query);
             statement.executeUpdate(query);
         } catch (SQLException e) {
             // if the error message is "out of memory",
@@ -91,7 +90,7 @@ public class DatabaseHelper {
      * @param assignment assignment
      */
     public static void insertAssignment(Assignment assignment) {
-        executeUpdate("REPLACE INTO " + TABLE_COURSES + " " + assignmentToValues(assignment));
+        executeUpdate("REPLACE INTO " + TABLE_ASSIGNMENTS + " " + assignmentToValues(assignment));
     }
 
     /**
@@ -137,10 +136,10 @@ public class DatabaseHelper {
         sb.append("'" + assignment.getId() + "',");
         sb.append(assignment.getIndex() + ",");
         sb.append(assignment.getMaxPoints() + ",");
-        sb.append(assignment.isExtraAssignment()? 1: 0 + ",");
+        sb.append((assignment.isExtraAssignment()? 1: 0) + ",");
         sb.append("'" + assignment.getCourse_id() + "',");
         sb.append(assignment.getAchievedPoints() + ",");
-        sb.append(assignment.getDate() + ",");
+        sb.append(assignment.getDate());
         sb.append(")");
         return sb.toString();
     }
@@ -155,7 +154,6 @@ public class DatabaseHelper {
 
             final String sql = "SELECT * FROM " + TABLE_COURSES
                     + " WHERE " + KEY_ID + "='" + courseId.toString() + "';";
-            logger.info("GetCourse Query: " + sql);
             ResultSet rs = statement.executeQuery(sql);
             while (rs.next()) {
                 // read the result set
@@ -277,7 +275,6 @@ public class DatabaseHelper {
             //language=SQLite
             final String query = "SELECT " + KEY_ID + ", " + KEY_COURSE_ID + " FROM " + TABLE_USER
                     + " WHERE " + KEY_ID + " = '" + userId+"';";
-            logger.info(query);
             ResultSet rs = statement.executeQuery(query);
             while (rs.next()) {
                 // read the result set

@@ -19,7 +19,7 @@ public class Server {
         port(9000);
         post("/updateCourse", "application/json", (req, res) -> {
 
-            logger.info("Entered updateCourse");
+            logger.info("Entered /updateCourse");
 
             // Get params
             JSONObject body = new JSONObject(req.body());
@@ -48,13 +48,14 @@ public class Server {
 //            return "";
 //        });
 
-        get("/all", (req, res) -> {
+        get("/getAllCourses", (req, res) -> {
 
             logger.info("Entered /all");
 
             final String userId = req.queryParams("userId");
+            logger.info("UserID: " + userId);
             final List<Course> allCourses = DatabaseHelper.getAllCourses(userId);
-            logger.info("Found courses: " + allCourses);
+            logger.info("Found " + allCourses.size() + " courses");
             return JSONParser.courseArrayToJSONArray(allCourses);
         });
 

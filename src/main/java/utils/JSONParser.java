@@ -151,7 +151,7 @@ public class JSONParser {
 
             //For each JSONObject as string create an assignment and add it to the list
             for (int i = 0; i < jsonArray.length(); i++) {
-                String assignmentString = jsonArray.getString(i);
+                String assignmentString = jsonArray.getJSONObject(i).toString();
                 Assignment assignment = jsonToAssignment(assignmentString);
                 assignments.add(assignment);
             }
