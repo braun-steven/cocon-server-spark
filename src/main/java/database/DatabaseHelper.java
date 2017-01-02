@@ -266,7 +266,8 @@ public class DatabaseHelper {
             Statement statement = connection.createStatement();
             statement.setQueryTimeout(30);  // set timeout to 30 sec.
             List<Course> courses = new ArrayList<>();
-            ResultSet rs = statement.executeQuery("SELECT " + KEY_ID + " FROM " + TABLE_COURSES);
+            ResultSet rs = statement.executeQuery("SELECT " + KEY_ID + "," + KEY_COURSE_ID + " FROM " + TABLE_USER
+                    + " WHERE " + KEY_ID + "=" + userId);
             while (rs.next()) {
                 // read the result set
                 final UUID courseUUID = UUID.fromString(rs.getString(KEY_ID));
