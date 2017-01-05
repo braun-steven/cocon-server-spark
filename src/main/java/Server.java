@@ -19,7 +19,7 @@ public class Server {
     /**
      * Server port
      */
-    private static final int PORT = 9000;
+    private static int PORT = 9000;
     
     /**
      * Main
@@ -27,6 +27,11 @@ public class Server {
      * @param args cmd args
      */
     public static void main(String[] args) {
+    
+        if (args.length == 1) {
+            PORT = Integer.parseInt(args[0]);
+        }
+        
         logger.info("Started server!!!!");
         DatabaseHelper.init();
         port(PORT);
