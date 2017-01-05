@@ -27,12 +27,13 @@ public class Server {
      * @param args cmd args
      */
     public static void main(String[] args) {
-    
+        
         if (args.length == 1) {
             PORT = Integer.parseInt(args[0]);
         }
         
         logger.info("Started server!!!!");
+        logger.info("Port: " + PORT);
         DatabaseHelper.init();
         port(PORT);
     

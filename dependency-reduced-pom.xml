@@ -37,6 +37,7 @@
           <archive>
             <manifest>
               <addClasspath>true</addClasspath>
+              <mainClass>Server</mainClass>
             </manifest>
           </archive>
         </configuration>
@@ -56,14 +57,5 @@
       </plugin>
     </plugins>
   </build>
-  <dependencies>
-    <dependency>
-      <groupId>com.tak3r07</groupId>
-      <artifactId>cocon-base</artifactId>
-      <version>1.0-SNAPSHOT</version>
-      <scope>system</scope>
-      <systemPath>${env.HOME}/IdeaProjects/cocon-base/target/cocon-base-1.0-SNAPSHOT.jar</systemPath>
-    </dependency>
-  </dependencies>
 </project>
 
