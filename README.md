@@ -20,3 +20,9 @@ cocon-base can now be included with
     <version>1.0-SNAPSHOT</version>
 </dependency>
 ```
+
+After the cocon-server jar has been built successfully run the following to 
+start the server
+```bash
+java -jar <path-to-jar> <PORT>
+```
